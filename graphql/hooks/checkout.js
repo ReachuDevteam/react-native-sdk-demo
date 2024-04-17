@@ -16,7 +16,7 @@ export const useCreateCheckout = () => {
       try {
         const response = await mutate({variables: {cartId}});
         console.log('Checkout created successfully', response.data);
-        return response.data.createCheckout;
+        return response.data.Checkout.CreateCheckout;
       } catch (e) {
         console.error('Error created checkout', e);
         throw e;
@@ -38,7 +38,7 @@ export const useUpdateCheckout = () => {
           variables: {checkoutId, email, billingAddress, shippingAddress},
         });
         console.log('Checkout updated successfully', response.data);
-        return response.data.updateCheckout;
+        return response.data.Checkout.UpdateCheckout;
       } catch (e) {
         console.error('Error updated checkout', e);
         throw e;
@@ -65,7 +65,7 @@ export const useCheckoutInitPaymentKlarna = () => {
           'Checkout init payment with klarna successfully',
           response.data,
         );
-        return response.data.checkoutInitPaymentKlarna;
+        return response.data.Payment.CreatePaymentKlarna;
       } catch (e) {
         console.error('Error updated checkout init payment with klarna ', e);
         throw e;
@@ -92,7 +92,7 @@ export const useCheckoutInitPaymentStripe = () => {
           'Checkout init payment with stripe successfully',
           response.data,
         );
-        return response.data.checkoutInitPaymentStripe;
+        return response.data.Payment.CreatePaymentStripe;
       } catch (e) {
         console.error('Error updated checkout init payment with stripe ', e);
         throw e;
@@ -110,16 +110,16 @@ export const useCheckoutPaymentIntentStripe = () => {
   );
 
   const checkoutPaymentIntentStripe = useCallback(
-    async checkoutId => {
+    async (checkoutId, returnEphemeralKey) => {
       try {
         const response = await mutate({
-          variables: {checkoutId},
+          variables: {checkoutId, returnEphemeralKey},
         });
         console.log(
           'Checkout init payment intent with stripe successfully',
           response.data,
         );
-        return response.data.checkoutPaymentIntentStripe;
+        return response.data.Payment.CreatePaymentIntentStripe;
       } catch (e) {
         console.error(
           'Error updated checkout init payment intent with stripe ',

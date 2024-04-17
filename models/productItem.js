@@ -13,7 +13,7 @@ export class CartItem {
     this.title = title;
     this.image = image;
     this.quantity = quantity;
-    this.productId = +productId;
+    this.productId = productId;
     this.unitPrice = unitPrice;
     this.currency = currency;
     this.tax = tax;

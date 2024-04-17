@@ -26,7 +26,7 @@ export const InitializationMain = ({children}) => {
 
   useEffect(() => {
     if (!loading && data) {
-      const cartId = data.createCart.cart_id;
+      const cartId = data.Cart.CreateCart.cart_id;
       dispatch({type: 'SET_CART_ID', payload: cartId});
     }
   }, [data, loading, dispatch]);

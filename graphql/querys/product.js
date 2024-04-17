@@ -1,87 +1,79 @@
 import {gql} from '@apollo/client';
 
 export const CHANNEL_GET_PRODUCTS_QUERY = gql`
-  query ChannelGetProducts($currency: String, $imageSize: ImageSize) {
-    channelGetProducts(currency: $currency, imageSize: $imageSize) {
-      id
-      title
-      description
-      tags
-      sku
-      quantity
-      price {
-        amount
-        currencyCode
-        baseAmount
-        compareAt
-      }
-      variants {
+  query GetProducts($currency: String, $imageSize: ImageSize) {
+    Channel {
+      GetProducts(currency: $currency, image_size: $imageSize) {
         id
-        barcode
-        quantity
-        sku
         title
-      }
-      barcode
-      options {
-        id
-        name
-        order
-        values
-      }
-      categories {
-        id
-        name
-      }
-      subcategories {
-        id
-        name
-      }
-      images {
-        id
-        url
-        width
-        height
-        order
-      }
-      productShipping {
-        id
-        name
         description
-        customPriceEnabled
-        default
-        shippingCountry {
-          id
+        tags
+        sku
+        quantity
+        price {
           amount
-          country
-          currencyCode
-          originalData {
+          currency_code
+          compare_at
+        }
+        variants {
+          id
+          barcode
+          quantity
+          sku
+          title
+        }
+        barcode
+        options {
+          id
+          name
+          order
+          values
+        }
+        categories {
+          id
+          name
+        }
+        images {
+          id
+          url
+          width
+          height
+          order
+        }
+        product_shipping {
+          id
+          name
+          description
+          custom_price_enabled
+          default
+          shipping_country {
+            id
             amount
-            currencyCode
-            baseAmount
+            country
+            currency_code
           }
         }
-      }
-      supplier
-      importedProduct
-      referralFee
-      optionsEnabled
-      digital
-      origin
-      return {
-        return_right
-        return_label
-        return_cost
-        supplier_policy
-        return_address {
-          sameAsBusiness
-          sameAsWarehouse
-          country
-          timezone
-          address
-          address2
-          postCode
-          returnCity
+        supplier
+        imported_product
+        referral_fee
+        options_enabled
+        digital
+        origin
+        return {
+          return_right
+          return_label
+          return_cost
+          supplier_policy
+          return_address {
+            same_as_business
+            same_as_warehouse
+            country
+            timezone
+            address
+            address_2
+            post_code
+            return_city
+          }
         }
       }
     }
@@ -89,95 +81,91 @@ export const CHANNEL_GET_PRODUCTS_QUERY = gql`
 `;
 
 export const CHANNEL_GET_PRODUCT_QUERY = gql`
-  query ChannelGetProduct(
+  query GetProduct(
     $currency: String
     $imageSize: ImageSize
+    $sku: String
+    $barcode: String
     $productId: Int
   ) {
-    channelGetProduct(
-      currency: $currency
-      imageSize: $imageSize
-      productId: $productId
-    ) {
-      id
-      title
-      description
-      tags
-      sku
-      quantity
-      price {
-        amount
-        currencyCode
-        baseAmount
-        compareAt
-      }
-      variants {
+    Channel {
+      GetProduct(
+        currency: $currency
+        image_size: $imageSize
+        sku: $sku
+        barcode: $barcode
+        product_id: $productId
+      ) {
         id
-        barcode
-        quantity
-        sku
         title
-      }
-      barcode
-      options {
-        id
-        name
-        order
-        values
-      }
-      categories {
-        id
-        name
-      }
-      subcategories {
-        id
-        name
-      }
-      images {
-        id
-        url
-        width
-        height
-        order
-      }
-      productShipping {
-        id
-        name
         description
-        customPriceEnabled
-        default
-        shippingCountry {
-          id
+        tags
+        sku
+        quantity
+        price {
           amount
-          country
-          currencyCode
-          originalData {
+          currency_code
+          compare_at
+        }
+        variants {
+          id
+          barcode
+          quantity
+          sku
+          title
+        }
+        barcode
+        options {
+          id
+          name
+          order
+          values
+        }
+        categories {
+          id
+          name
+        }
+        images {
+          id
+          url
+          width
+          height
+          order
+        }
+        product_shipping {
+          id
+          name
+          description
+          custom_price_enabled
+          default
+          shipping_country {
+            id
             amount
-            currencyCode
-            baseAmount
+            country
+            currency_code
           }
         }
-      }
-      supplier
-      importedProduct
-      referralFee
-      optionsEnabled
-      digital
-      origin
-      return {
-        return_right
-        return_label
-        return_cost
-        supplier_policy
-        return_address {
-          sameAsBusiness
-          sameAsWarehouse
-          country
-          timezone
-          address
-          address2
-          postCode
-          returnCity
+        supplier
+        imported_product
+        referral_fee
+        options_enabled
+        digital
+        origin
+        return {
+          return_right
+          return_label
+          return_cost
+          supplier_policy
+          return_address {
+            same_as_business
+            same_as_warehouse
+            country
+            timezone
+            address
+            address_2
+            post_code
+            return_city
+          }
         }
       }
     }

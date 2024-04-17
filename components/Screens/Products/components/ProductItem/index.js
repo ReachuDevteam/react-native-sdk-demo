@@ -44,6 +44,7 @@ const ProductItem = ({product}) => {
   const handleAddToCart = async (_product, currency, _cartId) => {
     try {
       setLoading(true);
+
       const cartItem = new CartItem({
         title: _product.title,
         currency: currency,

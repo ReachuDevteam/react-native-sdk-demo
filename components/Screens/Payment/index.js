@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Image,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
@@ -12,7 +11,6 @@ import {useCart} from '../../../context/cartContext';
 import {RadioButton} from 'react-native-paper';
 import {StripePaymentButton} from './components/StripePaymentButton';
 import {KlarnaPaymentButton} from './components/KlarnaPaymentButton';
-import {StripeSDKPaymentButton} from './components/StripeSDKPaymentButton';
 
 export const PaymentScreen = () => {
   const {
@@ -23,11 +21,6 @@ export const PaymentScreen = () => {
   const providers = [
     {id: 'stripe', title: 'Stripe', component: StripePaymentButton},
     {id: 'klarna', title: 'Klarna', component: KlarnaPaymentButton},
-    {
-      id: 'stripeSDK',
-      title: 'Stripe SDK',
-      component: StripeSDKPaymentButton,
-    },
   ];
 
   const {email, billingAddress, shippingAddress} = checkout;

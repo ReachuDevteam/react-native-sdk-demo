@@ -12,7 +12,7 @@ export const useCreateCart = () => {
           variables: {customerSessionId, currency},
         });
         console.log('Cart created successfully', response.data);
-        return response.data.createCart;
+        return response.data.Cart.CreateCart;
       } catch (e) {
         console.error('Error creating cart', JSON.stringify(e));
         throw e;
@@ -34,7 +34,7 @@ export const useUpdateCart = () => {
           variables: {cartId, shippingCountry},
         });
         console.log('Cart updated successfully', response.data);
-        return response.data.updateCart;
+        return response.data.Cart.UpdateCart;
       } catch (e) {
         console.error('Error updating cart', e);
         throw e;

@@ -15,9 +15,9 @@ export class Product {
       title: json.title,
       description: json.description || '',
       price: json.price.amount,
-      currencyCode: json.price.currencyCode,
+      currencyCode: json.price.currency_code,
       imageUrl: json.images && json.images[0] ? json.images[0].url : '',
-      productShipping: json.productShipping,
+      productShipping: json.product_shipping,
     });
   }
 }

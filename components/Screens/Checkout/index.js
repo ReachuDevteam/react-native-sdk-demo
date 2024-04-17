@@ -22,6 +22,7 @@ export const CheckoutScreen = () => {
     state: {selectedCountry, checkout, cartId, cartItems, selectedCurrency},
     dispatch,
   } = useCart();
+
   const [email, setEmail] = useState(checkout?.email ?? '');
   const [firstName, setFirstName] = useState(
     checkout?.billingAddress?.first_name ?? '',
@@ -145,14 +146,14 @@ export const CheckoutScreen = () => {
     }
 
     for (let shippingInfo of productShipping) {
-      let shippingCountries = shippingInfo.shippingCountry;
+      let shippingCountries = shippingInfo.shipping_country;
       if (shippingCountries) {
         for (const _country of shippingCountries) {
           const countryInfo = _country;
 
           if (
             countryInfo.country.toUpperCase() === _countryCode.toUpperCase() &&
-            countryInfo.currencyCode.toUpperCase() ===
+            countryInfo.currency_code.toUpperCase() ===
               _currencyCode.toUpperCase()
           ) {
             return countryInfo.id;

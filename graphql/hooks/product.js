@@ -14,7 +14,7 @@ export const useChannelGetProducts = (currency, imageSize = 'large') => {
   });
 
   const products = data
-    ? data.channelGetProducts.map(product => Product.fromJson(product))
+    ? data.Channel.GetProducts.map(product => Product.fromJson(product))
     : [];
 
   return {loading, error, products};
@@ -26,7 +26,13 @@ export const useChannelGetProduct = () => {
   );
 
   const executeChannelGetProduct = useCallback(
-    async (productId, currency = null, imageSize = 'large') => {
+    async (
+      productId,
+      currency = null,
+      sku = null,
+      barcode = null,
+      imageSize = 'large',
+    ) => {
       try {
         const response = await query({
           fetchPolicy: 'network-only',
@@ -35,11 +41,13 @@ export const useChannelGetProduct = () => {
             currency: currency,
             imageSize: imageSize,
             productId: productId,
+            sku: sku,
+            barcode: barcode,
           },
         });
         console.log('Return product successfully', response);
-        const product = response?.data?.channelGetProduct
-          ? Product.fromJson(response.data.channelGetProduct)
+        const product = response?.data?.Channel?.GetProduct
+          ? Product.fromJson(response.data.Channel.GetProduct)
           : null;
         return product;
       } catch (e) {

@@ -16,7 +16,7 @@ export const useCreateItemToCart = () => {
           variables: {cartId, lineItems},
         });
         console.log('Cart item created successfully', response.data);
-        return response.data.createItemToCart;
+        return response.data.Cart.AddItem;
       } catch (e) {
         console.error('Error create cart item', e);
         throw e;
@@ -38,7 +38,7 @@ export const useUpdateItemToCart = () => {
           variables: {cartId, cartItemId, qty, shippingId},
         });
         console.log('Cart item updated successfully', response.data);
-        return response.data.updateItemToCart;
+        return response.data.Cart.UpdateItem;
       } catch (e) {
         console.error('Error updating cart item', e);
         throw e;
@@ -60,7 +60,7 @@ export const useRemoveItemFromCart = () => {
           variables: {cartId, cartItemId},
         });
         console.log('Cart item removed successfully', response.data);
-        return response.data.removeItemToCart;
+        return response.data.Cart.DeleteItem;
       } catch (e) {
         console.error('Error removed cart item', e);
         throw e;
