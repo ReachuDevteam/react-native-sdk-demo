@@ -4,6 +4,8 @@ export const CREATE_CHECKOUT = gql`
   mutation CreateCheckout($cartId: String!) {
     Checkout {
       CreateCheckout(cart_id: $cartId) {
+        buyer_accepts_purchase_conditions
+        buyer_accepts_terms_conditions
         created_at
         updated_at
         id
@@ -110,25 +112,31 @@ export const CREATE_CHECKOUT = gql`
 export const UPDATE_CHECKOUT = gql`
   mutation UpdateCheckout(
     $checkoutId: String!
-    $status: String
-    $email: String
-    $successUrl: String
-    $cancelUrl: String
-    $paymentMethod: String
-    $shippingAddress: AddressArgs
+    $buyerAcceptsTermsConditions: Boolean
+    $buyerAcceptsPurchaseConditions: Boolean
     $billingAddress: AddressArgs
+    $shippingAddress: AddressArgs
+    $paymentMethod: String
+    $cancelUrl: String
+    $successUrl: String
+    $email: String
+    $status: String
   ) {
     Checkout {
       UpdateCheckout(
         checkout_id: $checkoutId
-        status: $status
-        email: $email
-        success_url: $successUrl
-        cancel_url: $cancelUrl
-        payment_method: $paymentMethod
-        shipping_address: $shippingAddress
+        buyer_accepts_terms_conditions: $buyerAcceptsTermsConditions
+        buyer_accepts_purchase_conditions: $buyerAcceptsPurchaseConditions
         billing_address: $billingAddress
+        shipping_address: $shippingAddress
+        payment_method: $paymentMethod
+        cancel_url: $cancelUrl
+        success_url: $successUrl
+        email: $email
+        status: $status
       ) {
+        buyer_accepts_purchase_conditions
+        buyer_accepts_terms_conditions
         created_at
         updated_at
         id

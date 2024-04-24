@@ -49,6 +49,8 @@ export const CheckoutScreen = () => {
   const [company, setCompany] = useState(
     checkout?.billingAddress?.company ?? '',
   );
+  const [acceptsTermsConditions] = useState(true);
+  const [acceptsPurchaseConditions] = useState(true);
   const [sameAsBillingAddress, setSameAsBillingAddress] = useState(true);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -219,6 +221,8 @@ export const CheckoutScreen = () => {
           email,
           billingAddress,
           shippingAddress,
+          acceptsTermsConditions,
+          acceptsPurchaseConditions,
         );
 
         dispatch({
@@ -351,6 +355,20 @@ export const CheckoutScreen = () => {
             Shipping address is the same as billing address
           </Text>
         </View>
+        <Text style={styles.summaryText}>
+          By proceeding with this checkout, you automatically agree to our Terms
+          and Conditions and Purchase Conditions. These conditions are designed
+          to ensure a smooth transaction and clarify the responsibilities and
+          rights of all parties involved.
+        </Text>
+        <View style={styles.checkboxContainer}>
+          <CheckBox disabled value={acceptsTermsConditions} />
+          <Text style={styles.checkboxLabel}>Accept Terms and Conditions</Text>
+        </View>
+        <View style={styles.checkboxContainer}>
+          <CheckBox disabled value={acceptsPurchaseConditions} />
+          <Text style={styles.checkboxLabel}>Accept Purchase Conditions</Text>
+        </View>
         <Button
           title="Submit Order"
           onPress={submitForm}
@@ -417,5 +435,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  summaryText: {
+    fontSize: 16,
+    color: '#666', // Dark gray for readability
+    marginBottom: 20,
   },
 });

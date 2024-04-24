@@ -32,10 +32,24 @@ export const useUpdateCheckout = () => {
   const [mutate, {data, loading, error}] = useMutation(UPDATE_CHECKOUT);
 
   const updateCheckout = useCallback(
-    async (checkoutId, email, billingAddress, shippingAddress) => {
+    async (
+      checkoutId,
+      email,
+      billingAddress,
+      shippingAddress,
+      buyerAcceptsTermsConditions = true,
+      buyerAcceptsPurchaseConditions = true,
+    ) => {
       try {
         const response = await mutate({
-          variables: {checkoutId, email, billingAddress, shippingAddress},
+          variables: {
+            checkoutId,
+            email,
+            billingAddress,
+            shippingAddress,
+            buyerAcceptsTermsConditions,
+            buyerAcceptsPurchaseConditions,
+          },
         });
         console.log('Checkout updated successfully', response.data);
         return response.data.Checkout.UpdateCheckout;
