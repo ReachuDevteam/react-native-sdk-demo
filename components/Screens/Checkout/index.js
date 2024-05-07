@@ -130,7 +130,7 @@ export const CheckoutScreen = () => {
       email: email,
       first_name: address.first_name,
       last_name: address.last_name,
-      phone: +address.phone,
+      phone: address.phone,
       phone_code: address.phoneCode,
       province: address.province,
       province_code: address.provinceCode,
