@@ -1,46 +1,62 @@
-import {useMutation} from '@apollo/client';
-import {CREATE_CART_MUTATION, UPDATE_CART_MUTATION} from '../mutations/cart';
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
+import {useReachuSdk} from '../../context/reachu-sdk-provider';
 
 export const useCreateCart = () => {
-  const [mutate, {data, loading, error}] = useMutation(CREATE_CART_MUTATION);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const executeCreateCart = useCallback(
-    async (customerSessionId, currency) => {
+    async (customerSessionId, currency, country) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {customerSessionId, currency},
+        const cart = await sdk.cart.create({
+          customer_session_id: customerSessionId,
+          currency,
+          shippingCountry: country,
         });
-        console.log('Cart created successfully', response.data);
-        return response.data.Cart.CreateCart;
+        setData(cart);
+        return cart;
       } catch (e) {
-        console.error('Error creating cart', JSON.stringify(e));
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {executeCreateCart, data, loading, error};
 };
 
 export const useUpdateCart = () => {
-  const [mutate, {data, loading, error}] = useMutation(UPDATE_CART_MUTATION);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const executeUpdateCart = useCallback(
     async (cartId, shippingCountry) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {cartId, shippingCountry},
+        const cart = await sdk.cart.update({
+          cart_id: cartId,
+          shipping_country: shippingCountry,
         });
-        console.log('Cart updated successfully', response.data);
-        return response.data.Cart.UpdateCart;
+        setData(cart);
+        return cart;
       } catch (e) {
-        console.error('Error updating cart', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {executeUpdateCart, data, loading, error};

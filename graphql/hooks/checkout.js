@@ -1,35 +1,39 @@
-import {useMutation} from '@apollo/client';
-import {
-  CHECKOUT_INIT_PAYMENT_KLARNA,
-  CHECKOUT_INIT_PAYMENT_STRIPE,
-  CHECKOUT_PAYMENT_INTENT_STRIPE,
-  CREATE_CHECKOUT,
-  UPDATE_CHECKOUT,
-} from '../mutations/checkout';
-import {useCallback} from 'react';
+// graphql/hooks/checkout.js
+import {useCallback, useState} from 'react';
+import {useReachuSdk} from '../../context/reachu-sdk-provider';
 
 export const useCreateCheckout = () => {
-  const [mutate, {data, loading, error}] = useMutation(CREATE_CHECKOUT);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const createCheckout = useCallback(
     async cartId => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({variables: {cartId}});
-        console.log('Checkout created successfully', response.data);
-        return response.data.Checkout.CreateCheckout;
+        const checkout = await sdk.checkout.create({cart_id: cartId});
+        setData(checkout);
+        return checkout;
       } catch (e) {
-        console.error('Error created checkout', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {createCheckout, data, loading, error};
 };
 
 export const useUpdateCheckout = () => {
-  const [mutate, {data, loading, error}] = useMutation(UPDATE_CHECKOUT);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const updateCheckout = useCallback(
     async (
@@ -40,109 +44,128 @@ export const useUpdateCheckout = () => {
       buyerAcceptsTermsConditions = true,
       buyerAcceptsPurchaseConditions = true,
     ) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {
-            checkoutId,
-            email,
-            billingAddress,
-            shippingAddress,
-            buyerAcceptsTermsConditions,
-            buyerAcceptsPurchaseConditions,
+        const _data = {
+          checkout_id: checkoutId,
+          billing_address: {
+            ...(billingAddress || {}),
+            email: (billingAddress && billingAddress.email) || email,
           },
-        });
-        console.log('Checkout updated successfully', response.data);
-        return response.data.Checkout.UpdateCheckout;
+          shipping_address: {
+            ...(shippingAddress || {}),
+            email: (shippingAddress && shippingAddress.email) || email,
+          },
+          buyer_accepts_terms_conditions: buyerAcceptsTermsConditions,
+          buyer_accepts_purchase_conditions: buyerAcceptsPurchaseConditions,
+        };
+
+        const checkout = await sdk.checkout.update(_data);
+        setData(checkout);
+        return checkout;
       } catch (e) {
-        console.error('Error updated checkout', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {updateCheckout, data, loading, error};
 };
 
 export const useCheckoutInitPaymentKlarna = () => {
-  const [mutate, {data, loading, error}] = useMutation(
-    CHECKOUT_INIT_PAYMENT_KLARNA,
-  );
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const checkoutInitPaymentKlarna = useCallback(
     async (checkoutId, countryCode, href, email) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {checkoutId, countryCode, href, email},
+        const res = await sdk.payment.klarnaInit({
+          checkout_id: checkoutId,
+          country_code: countryCode,
+          href,
+          email,
         });
-        console.log(
-          'Checkout init payment with klarna successfully',
-          response.data,
-        );
-        return response.data.Payment.CreatePaymentKlarna;
+        setData(res);
+        return res;
       } catch (e) {
-        console.error('Error updated checkout init payment with klarna ', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {checkoutInitPaymentKlarna, data, loading, error};
 };
 
 export const useCheckoutInitPaymentStripe = () => {
-  const [mutate, {data, loading, error}] = useMutation(
-    CHECKOUT_INIT_PAYMENT_STRIPE,
-  );
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const checkoutInitPaymentStripe = useCallback(
     async (email, paymentMethod, successUrl, checkoutId) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {email, paymentMethod, successUrl, checkoutId},
+        const res = await sdk.payment.stripeLink({
+          checkout_id: checkoutId,
+          success_url: successUrl,
+          email,
+          payment_method: paymentMethod,
         });
-        console.log(
-          'Checkout init payment with stripe successfully',
-          response.data,
-        );
-        return response.data.Payment.CreatePaymentStripe;
+        setData(res);
+        return res;
       } catch (e) {
-        console.error('Error updated checkout init payment with stripe ', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {checkoutInitPaymentStripe, data, loading, error};
 };
 
 export const useCheckoutPaymentIntentStripe = () => {
-  const [mutate, {data, loading, error}] = useMutation(
-    CHECKOUT_PAYMENT_INTENT_STRIPE,
-  );
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const checkoutPaymentIntentStripe = useCallback(
     async (checkoutId, returnEphemeralKey) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {checkoutId, returnEphemeralKey},
+        const res = await sdk.payment.stripeIntent({
+          checkout_id: checkoutId,
+          return_ephemeral_key: !!returnEphemeralKey,
         });
-        console.log(
-          'Checkout init payment intent with stripe successfully',
-          response.data,
-        );
-        return response.data.Payment.CreatePaymentIntentStripe;
+        setData(res);
+        return res;
       } catch (e) {
-        console.error(
-          'Error updated checkout init payment intent with stripe ',
-          e,
-        );
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {checkoutPaymentIntentStripe, data, loading, error};

@@ -30,6 +30,7 @@ const ProductDetailModal = ({productId, isVisible, onClose}) => {
           productId,
           selectedCurrency,
         );
+
         if (productData) {
           setProductDetail(productData);
         }

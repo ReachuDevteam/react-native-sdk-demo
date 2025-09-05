@@ -1,72 +1,93 @@
-import {useMutation} from '@apollo/client';
-import {
-  CREATE_ITEM_TO_CART,
-  REMOVE_ITEM_FROM_CART,
-  UPDATE_ITEM_TO_CART,
-} from '../mutations/cartItem';
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
+import {useReachuSdk} from '../../context/reachu-sdk-provider';
 
 export const useCreateItemToCart = () => {
-  const [mutate, {data, loading, error}] = useMutation(CREATE_ITEM_TO_CART);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const createItemToCart = useCallback(
     async (cartId, lineItems) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {cartId, lineItems},
+        const cart = await sdk.cart.addItem({
+          cart_id: cartId,
+          line_items: lineItems,
         });
-        console.log('Cart item created successfully', response.data);
-        return response.data.Cart.AddItem;
+        setData(cart);
+        return cart;
       } catch (e) {
-        console.error('Error create cart item', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {createItemToCart, data, loading, error};
 };
 
 export const useUpdateItemToCart = () => {
-  const [mutate, {data, loading, error}] = useMutation(UPDATE_ITEM_TO_CART);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const updateItemToCart = useCallback(
     async (cartId, cartItemId, qty, shippingId) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {cartId, cartItemId, qty, shippingId},
+        const cart = await sdk.cart.updateItem({
+          cart_id: cartId,
+          cart_item_id: cartItemId,
+          quantity: qty,
+          ...(shippingId ? {shipping_id: shippingId} : {}),
         });
-        console.log('Cart item updated successfully', response.data);
-        return response.data.Cart.UpdateItem;
+        setData(cart);
+        return cart;
       } catch (e) {
-        console.error('Error updating cart item', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {updateItemToCart, data, loading, error};
 };
 
 export const useRemoveItemFromCart = () => {
-  const [mutate, {data, loading, error}] = useMutation(REMOVE_ITEM_FROM_CART);
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const removeItemFromCart = useCallback(
     async (cartId, cartItemId) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await mutate({
-          variables: {cartId, cartItemId},
+        const cart = await sdk.cart.deleteItem({
+          cart_id: cartId,
+          cart_item_id: cartItemId,
         });
-        console.log('Cart item removed successfully', response.data);
-        return response.data.Cart.DeleteItem;
+        setData(cart);
+        return cart;
       } catch (e) {
-        console.error('Error removed cart item', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [mutate],
+    [sdk],
   );
 
   return {removeItemFromCart, data, loading, error};

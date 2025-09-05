@@ -5,6 +5,7 @@ import {useCart, actions} from '../../context/cartContext';
 
 const tabs = [
   {name: 'Products', icon: 'home', type: 'font-awesome'},
+  {name: 'Shipping', icon: 'truck', type: 'font-awesome'},
   {name: 'Checkout', icon: 'shopping-cart', type: 'font-awesome'},
   {name: 'Payment', icon: 'credit-card', type: 'font-awesome'},
 ];

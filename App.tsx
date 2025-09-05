@@ -16,6 +16,7 @@ import {InitializationMain} from './components/InitializationMain';
 import AppHeader from './components/Header';
 import FooterNavigation from './components/FooterNavigation';
 import {ScreenContainer} from './components/Screens/Container';
+import {ReachuSdkProvider} from './context/reachu-sdk-provider';
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -25,17 +26,19 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <ApolloProvider client={client}>
-      <CartProvider>
-        <InitializationMain>
-          <SafeAreaView style={[styles.container, backgroundStyle]}>
-            <AppHeader title="Online Store" />
-            <ScreenContainer style={styles.screenContainerPadding} />
-            <FooterNavigation />
-          </SafeAreaView>
-        </InitializationMain>
-      </CartProvider>
-    </ApolloProvider>
+    <ReachuSdkProvider>
+      <ApolloProvider client={client}>
+        <CartProvider>
+          <InitializationMain>
+            <SafeAreaView style={[styles.container, backgroundStyle]}>
+              <AppHeader title="Online Store" />
+              <ScreenContainer style={styles.screenContainerPadding} />
+              <FooterNavigation />
+            </SafeAreaView>
+          </InitializationMain>
+        </CartProvider>
+      </ApolloProvider>
+    </ReachuSdkProvider>
   );
 }
 

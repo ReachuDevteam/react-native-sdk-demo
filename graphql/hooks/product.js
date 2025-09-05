@@ -1,29 +1,62 @@
-import {useLazyQuery, useQuery} from '@apollo/client';
-import {
-  CHANNEL_GET_PRODUCTS_QUERY,
-  CHANNEL_GET_PRODUCT_QUERY,
-} from '../querys/product';
+import {useCallback, useEffect, useState} from 'react';
+import {useReachuSdk} from '../../context/reachu-sdk-provider';
 import {Product} from '../../models/product';
-import {useCallback} from 'react';
 
+/** List products (was: useQuery CHANNEL_GET_PRODUCTS_QUERY) */
 export const useChannelGetProducts = (currency, imageSize = 'large') => {
-  const {loading, error, data} = useQuery(CHANNEL_GET_PRODUCTS_QUERY, {
-    variables: {currency, imageSize},
-    fetchPolicy: 'network-only', // It only makes the call on the network, it does not use the cache.
-    nextFetchPolicy: 'cache-only', // After the first fetch, it only uses the cache
-  });
+  const sdk = useReachuSdk();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(!!currency);
+  const [error, setError] = useState(null);
 
-  const products = data
-    ? data.Channel.GetProducts.map(product => Product.fromJson(product))
-    : [];
+  useEffect(() => {
+    let cancelled = false;
+    if (!currency) {
+      setProducts([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const list = await sdk.channel.product.get({
+          currency,
+          image_size: imageSize,
+        });
+        if (!cancelled) {
+          setProducts(
+            Array.isArray(list) ? list.map(p => Product.fromJson(p)) : [],
+          );
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e);
+          setProducts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sdk, currency, imageSize]);
 
   return {loading, error, products};
 };
 
+/** Get single product lazily (was: useLazyQuery CHANNEL_GET_PRODUCT_QUERY) */
 export const useChannelGetProduct = () => {
-  const [query, {loading, error, data}] = useLazyQuery(
-    CHANNEL_GET_PRODUCT_QUERY,
-  );
+  const sdk = useReachuSdk();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const executeChannelGetProduct = useCallback(
     async (
@@ -33,29 +66,38 @@ export const useChannelGetProduct = () => {
       barcode = null,
       imageSize = 'large',
     ) => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await query({
-          fetchPolicy: 'network-only',
-          nextFetchPolicy: 'cache-only',
-          variables: {
-            currency: currency,
-            imageSize: imageSize,
-            productId: productId,
-            sku: sku,
-            barcode: barcode,
-          },
-        });
-        console.log('Return product successfully', response);
-        const product = response?.data?.Channel?.GetProduct
-          ? Product.fromJson(response.data.Channel.GetProduct)
-          : null;
-        return product;
+        const params = {image_size: imageSize};
+        if (currency) {
+          params.currency = currency;
+        }
+        if (productId != null) {
+          params.product_ids = [productId];
+        }
+        if (sku) {
+          params.sku_list = [sku];
+        }
+        if (barcode) {
+          params.barcode_list = [barcode];
+        }
+
+        let products = await sdk.channel.product.get(params);
+
+        const product = products?.length > 0 ? products[0] : null;
+
+        const mapped = product ? Product.fromJson(product) : null;
+        setData(mapped);
+        return mapped;
       } catch (e) {
-        console.error('Error return product', e);
+        setError(e);
         throw e;
+      } finally {
+        setLoading(false);
       }
     },
-    [query],
+    [sdk],
   );
 
   return {executeChannelGetProduct, data, loading, error};

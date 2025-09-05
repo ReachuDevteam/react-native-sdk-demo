@@ -7,7 +7,7 @@ import {useCart} from '../../context/cartContext';
 export const InitializationMain = ({children}) => {
   const {executeCreateCart, data, loading, error} = useCreateCart();
   const {
-    state: {selectedCurrency},
+    state: {selectedCurrency, selectedCountry},
     dispatch,
   } = useCart();
 
@@ -18,15 +18,16 @@ export const InitializationMain = ({children}) => {
         .substring(2, 15)}`;
       const customerSessionId = id;
       const currency = selectedCurrency;
-      await executeCreateCart(customerSessionId, currency);
+      const country = selectedCountry;
+      await executeCreateCart(customerSessionId, currency, country);
     };
 
     initializeCart();
-  }, [selectedCurrency, executeCreateCart]);
+  }, [selectedCurrency, selectedCountry, executeCreateCart]);
 
   useEffect(() => {
     if (!loading && data) {
-      const cartId = data.Cart.CreateCart.cart_id;
+      const cartId = data.cart_id;
       dispatch({type: 'SET_CART_ID', payload: cartId});
     }
   }, [data, loading, dispatch]);

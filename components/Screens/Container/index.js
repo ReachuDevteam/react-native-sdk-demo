@@ -3,6 +3,7 @@ import {useCart} from '../../../context/cartContext';
 import {ProductsScreen} from '../Products';
 import {PaymentScreen} from '../Payment';
 import {CheckoutScreen} from '../Checkout';
+import {ShippingScreen} from '../Shipping';
 import {StyleSheet, View} from 'react-native';
 
 export const ScreenContainer = ({style}) => {
@@ -13,6 +14,12 @@ export const ScreenContainer = ({style}) => {
       return (
         <View style={[styles.container, style]}>
           <ProductsScreen />
+        </View>
+      );
+    case 'Shipping':
+      return (
+        <View style={[styles.container, style]}>
+          <ShippingScreen />
         </View>
       );
     case 'Checkout':

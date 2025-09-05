@@ -10,44 +10,61 @@ import {
 import {Button} from '@rneui/themed';
 import CheckBox from '@react-native-community/checkbox';
 import {actions, useCart} from '../../../context/cartContext';
-import {useUpdateCart} from '../../../graphql/hooks/cart';
 import {
   useCreateCheckout,
   useUpdateCheckout,
 } from '../../../graphql/hooks/checkout';
-import {useUpdateItemToCart} from '../../../graphql/hooks/cartItem';
+
+const MOCK_DEFAULTS = {
+  email: 'john.doe@example.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneCode: '47',
+  phone: '21988837',
+  address1: 'Storgata 15 A',
+  address2: '',
+  city: 'Oslo',
+  country: 'Norway',
+  zip: '0161',
+  company: '',
+};
 
 export const CheckoutScreen = () => {
   const {
-    state: {selectedCountry, checkout, cartId, cartItems, selectedCurrency},
+    state: {selectedCountry, checkout, cartId},
     dispatch,
   } = useCart();
 
-  const [email, setEmail] = useState(checkout?.email ?? '');
+  // Prefill with checkout values if present; otherwise mock defaults
+  const [email, setEmail] = useState(checkout?.email ?? MOCK_DEFAULTS.email);
   const [firstName, setFirstName] = useState(
-    checkout?.billingAddress?.first_name ?? '',
+    checkout?.billingAddress?.first_name ?? MOCK_DEFAULTS.firstName,
   );
   const [lastName, setLastName] = useState(
-    checkout?.billingAddress?.last_name ?? '',
+    checkout?.billingAddress?.last_name ?? MOCK_DEFAULTS.lastName,
   );
   const [phone, setPhone] = useState(
-    (checkout?.billingAddress?.phone ?? '') + '',
+    (checkout?.billingAddress?.phone ?? MOCK_DEFAULTS.phone) + '',
   );
-  const [phoneCode] = useState(checkout?.billingAddress?.phoneCode ?? '+47');
+  const [phoneCode] = useState(
+    checkout?.billingAddress?.phoneCode ?? MOCK_DEFAULTS.phoneCode,
+  );
   const [address1, setAddress1] = useState(
-    checkout?.billingAddress?.address1 ?? '',
+    checkout?.billingAddress?.address1 ?? MOCK_DEFAULTS.address1,
   );
   const [address2, setAddress2] = useState(
-    checkout?.billingAddress?.address2 ?? '',
+    checkout?.billingAddress?.address2 ?? MOCK_DEFAULTS.address2,
   );
-  const [city, setCity] = useState(checkout?.billingAddress?.city ?? '');
-  const [country, setCountry] = useState('Norway');
+  const [city, setCity] = useState(
+    checkout?.billingAddress?.city ?? MOCK_DEFAULTS.city,
+  );
+  const [country, setCountry] = useState(MOCK_DEFAULTS.country);
   const [countryCode] = useState(selectedCountry);
   const [zipCode, setZipCode] = useState(
-    (checkout?.billingAddress?.zip ?? '') + '',
+    (checkout?.billingAddress?.zip ?? MOCK_DEFAULTS.zip) + '',
   );
   const [company, setCompany] = useState(
-    checkout?.billingAddress?.company ?? '',
+    checkout?.billingAddress?.company ?? MOCK_DEFAULTS.company,
   );
   const [acceptsTermsConditions] = useState(true);
   const [acceptsPurchaseConditions] = useState(true);
@@ -55,13 +72,8 @@ export const CheckoutScreen = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const {executeUpdateCart} = useUpdateCart();
-
   const {createCheckout} = useCreateCheckout();
-
   const {updateCheckout} = useUpdateCheckout();
-
-  const {updateItemToCart} = useUpdateItemToCart();
 
   const validateForm = () => {
     let isValid = true;
@@ -79,37 +91,30 @@ export const CheckoutScreen = () => {
       newErrors.lastName = 'Last name is required';
       isValid = false;
     }
-
     if (!phoneCode) {
       newErrors.phoneCode = 'Phone code is required';
       isValid = false;
     }
-
     if (!phone) {
       newErrors.phone = 'Phone is required';
       isValid = false;
     }
-
     if (!address1) {
       newErrors.address1 = 'Address Line 1 is required';
       isValid = false;
     }
-
     if (!country) {
       newErrors.country = 'Country is required';
       isValid = false;
     }
-
     if (!countryCode) {
       newErrors.countryCode = 'Country code is required';
       isValid = false;
     }
-
     if (!city) {
       newErrors.city = 'City is required';
       isValid = false;
     }
-
     if (!zipCode) {
       newErrors.zipCode = 'Zip/Postal Code is required';
       isValid = false;
@@ -138,81 +143,28 @@ export const CheckoutScreen = () => {
     };
   };
 
-  const findShippingCountryId = (
-    _countryCode,
-    _currencyCode,
-    productShipping,
-  ) => {
-    if (!productShipping) {
-      return null;
-    }
-
-    for (let shippingInfo of productShipping) {
-      let shippingCountries = shippingInfo.shipping_country;
-      if (shippingCountries) {
-        for (const _country of shippingCountries) {
-          const countryInfo = _country;
-
-          if (
-            countryInfo.country.toUpperCase() === _countryCode.toUpperCase() &&
-            countryInfo.currency_code.toUpperCase() ===
-              _currencyCode.toUpperCase()
-          ) {
-            return countryInfo.id;
-          }
-        }
-      }
-    }
-
-    return null;
-  };
-
   const submitForm = async () => {
     try {
       setIsLoading(true);
       if (validateForm()) {
         const address = formatAddressForMutation({
-          address1: address1,
-          address2: address2,
-          city: city,
-          company: company,
-          country: country,
-          countryCode: countryCode,
-          email: email,
+          address1,
+          address2,
+          city,
+          company,
+          country,
+          countryCode,
+          email,
           first_name: firstName,
           last_name: lastName,
-          phone: phone,
-          phoneCode: phoneCode,
+          phone,
+          phoneCode,
           province: city,
           provinceCode: '',
           zip: zipCode,
         });
         const billingAddress = address;
         const shippingAddress = address;
-
-        // Update the cart mutation with the country of shipment.
-        await executeUpdateCart(cartId, selectedCountry);
-
-        // Iterate over the items in the cart and update them if necessary.
-        for (const cartItem of cartItems) {
-          const countryId = await findShippingCountryId(
-            countryCode,
-            selectedCurrency,
-            cartItem.productShipping,
-          );
-          if (countryId != null) {
-            await updateItemToCart(
-              cartId,
-              cartItem.cartItemId,
-              null,
-              countryId,
-            );
-          } else {
-            console.error(
-              `Country id could not be found for the cart item with id: ${cartItem.cartItemId}`,
-            );
-          }
-        }
 
         const newCheckout = await createCheckout(cartId);
 
@@ -229,9 +181,9 @@ export const CheckoutScreen = () => {
           type: actions.SET_CHECKOUT_STATE,
           payload: {
             id: newCheckout?.id,
-            email: email,
-            billingAddress: billingAddress,
-            shippingAddress: shippingAddress,
+            email,
+            billingAddress,
+            shippingAddress,
           },
         });
 
@@ -438,7 +390,7 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 16,
-    color: '#666', // Dark gray for readability
+    color: '#666',
     marginBottom: 20,
   },
 });
