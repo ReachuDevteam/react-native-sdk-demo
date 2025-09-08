@@ -16,7 +16,7 @@ import {
 } from '../../../graphql/hooks/checkout';
 
 const MOCK_DEFAULTS = {
-  email: 'john.doe@example.com',
+  email: '',
   firstName: 'John',
   lastName: 'Doe',
   phoneCode: '47',
