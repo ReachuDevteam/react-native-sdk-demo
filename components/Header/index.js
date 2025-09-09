@@ -1,17 +1,18 @@
 import React, {useState} from 'react';
-import {Header, Badge, Icon} from '@rneui/themed';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import {Image} from '@rneui/base/dist/Image/Image';
+import {Header, Badge, Icon, Image} from '@rneui/themed';
+import {StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 import {SELECT_CURRENCY} from '../../consts/env';
 import {useCart} from '../../context/cartContext';
 import CartSummaryModal from './CartSummaryModal';
+
+const logo = require('../../images/logo-demo.png');
+const countryFlag = require('../../images/flags/no.png');
 
 const AppHeader = ({title}) => {
   const {
     state: {cartItems},
   } = useCart();
   const countSelectProducts = cartItems.length;
-  const countryFlag = require('../../images/flags/no.png');
   const [isCartSummaryVisible, setIsCartSummaryVisible] = useState(false);
 
   const toggleCartSummaryModal = () => {
@@ -21,10 +22,17 @@ const AppHeader = ({title}) => {
   return (
     <>
       <Header
-        centerComponent={{
-          text: title,
-          style: styles.centerComponentStyle,
-        }}
+        backgroundColor="#007bff"
+        centerComponent={
+          <View style={styles.centerWrap}>
+            <Image
+              source={logo}
+              style={styles.logo}
+              accessibilityLabel="Demo logo"
+            />
+            <Text style={styles.centerTitle}>{title}</Text>
+          </View>
+        }
         leftComponent={
           <TouchableOpacity onPress={toggleCartSummaryModal}>
             <View style={styles.leftComponentContainer}>
@@ -58,8 +66,8 @@ const AppHeader = ({title}) => {
             </View>
           </View>
         }
-        backgroundColor="#007bff"
       />
+
       <CartSummaryModal
         isVisible={isCartSummaryVisible}
         onClose={toggleCartSummaryModal}
@@ -69,11 +77,24 @@ const AppHeader = ({title}) => {
 };
 
 const styles = StyleSheet.create({
-  centerComponentStyle: {
+  // centro
+  centerWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 28, // ajusta si quieres más grande
+    height: 28,
+    marginRight: 8,
+    resizeMode: 'contain',
+  },
+  centerTitle: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
   },
+
+  // existentes
   leftComponentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -88,7 +109,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: 'white',
   },
-
   badgeCurrencyTextStyle: {
     fontSize: 10,
     color: 'white',
@@ -98,6 +118,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 20,
     marginRight: 6,
+    resizeMode: 'contain',
   },
 });
 

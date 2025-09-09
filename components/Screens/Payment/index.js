@@ -16,6 +16,7 @@ export const PaymentScreen = () => {
   const {
     state: {cartItems, checkout, selectedCurrency},
   } = useCart();
+
   const [selectedProvider, setSelectedProvider] = useState('stripe');
 
   const providers = [
@@ -25,20 +26,28 @@ export const PaymentScreen = () => {
 
   const {email, billingAddress, shippingAddress} = checkout;
 
-  const total = cartItems
-    .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-    .toFixed(2);
+  const totalNumber = cartItems.reduce(
+    (sum, item) => sum + Number(item.unitPrice) * Number(item.quantity),
+    0,
+  );
+  const total = totalNumber.toFixed(2);
 
   const renderPaymentButton = _providers => {
-    const __provider = _providers.find(
-      provider => provider.id === selectedProvider,
-    );
-    if (!__provider) {
-      return <></>;
-    }
+    const p = _providers.find(pr => pr.id === selectedProvider);
+    if (!p) return null;
 
-    const PaymentButtonComponent = __provider.component;
-    return <PaymentButtonComponent />;
+    const PaymentButtonComponent = p.component;
+
+    const stripeProps = {
+      email,
+      totalAmount: totalNumber,
+      currency: selectedCurrency,
+      onChangeMethod: () => setSelectedProvider('klarna'),
+    };
+
+    return (
+      <PaymentButtonComponent {...(p.id === 'stripe' ? stripeProps : {})} />
+    );
   };
 
   const renderProductItem = ({item}) => (
@@ -46,10 +55,9 @@ export const PaymentScreen = () => {
       <Image source={{uri: item.image}} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{item.title}</Text>
-        <Text
-          style={
-            styles.productQuantityPrice
-          }>{`${item.quantity} x ${item.currency}${item.unitPrice}`}</Text>
+        <Text style={styles.productQuantityPrice}>
+          {`${item.quantity} x ${item.currency}${item.unitPrice}`}
+        </Text>
       </View>
     </View>
   );
@@ -61,15 +69,13 @@ export const PaymentScreen = () => {
         <Text style={styles.infoLabel}>Email:</Text>
         <Text style={styles.infoContent}>{email}</Text>
         <Text style={styles.infoLabel}>Billing Address:</Text>
-        <Text
-          style={
-            styles.infoContent
-          }>{`${billingAddress.first_name} ${billingAddress.last_name}, ${billingAddress.address1}, ${billingAddress.city}`}</Text>
+        <Text style={styles.infoContent}>
+          {`${billingAddress.first_name} ${billingAddress.last_name}, ${billingAddress.address1}, ${billingAddress.city}`}
+        </Text>
         <Text style={styles.infoLabel}>Shipping Address:</Text>
-        <Text
-          style={
-            styles.infoContent
-          }>{`${shippingAddress.first_name} ${shippingAddress.last_name}, ${shippingAddress.address1}, ${shippingAddress.city}`}</Text>
+        <Text style={styles.infoContent}>
+          {`${shippingAddress.first_name} ${shippingAddress.last_name}, ${shippingAddress.address1}, ${shippingAddress.city}`}
+        </Text>
       </View>
 
       <View style={styles.section}>

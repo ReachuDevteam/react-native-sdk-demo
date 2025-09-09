@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Modal,
   ActivityIndicator,
+  BackHandler,
+  SafeAreaView,
 } from 'react-native';
 import {WebView} from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,13 +19,36 @@ export const KlarnaPaymentButton = () => {
   const {
     state: {checkout, selectedCountry},
   } = useCart();
+
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [showWebView, setShowWebView] = useState(false);
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
   const [orderId, setOrderId] = useState('');
+  const [canGoBack, setCanGoBack] = useState(false);
+  const webRef = useRef(null);
 
   const {checkoutInitPaymentKlarna} = useCheckoutInitPaymentKlarna();
+
+  const closeModal = () => {
+    setShowWebView(false);
+    setLoading(false);
+    setCanGoBack(false);
+  };
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (!showWebView) return false;
+      if (canGoBack && webRef.current) {
+        webRef.current.goBack();
+      } else {
+        closeModal();
+      }
+      return true;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [showWebView, canGoBack]);
 
   const initiatePayment = async () => {
     try {
@@ -48,6 +73,15 @@ export const KlarnaPaymentButton = () => {
     }
   };
 
+  const handleNavChange = event => {
+    setCanGoBack(event.canGoBack);
+    const returnUrl = `${FAKE_RETURN_URL}?order_id=${orderId}&payment_processor=KLARNA`;
+    if (event.url?.includes(returnUrl)) {
+      closeModal();
+      setPaymentSuccess(true);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {!paymentSuccess && (
@@ -61,26 +95,51 @@ export const KlarnaPaymentButton = () => {
           animationType="slide"
           transparent={false}
           visible={showWebView}
-          onRequestClose={() => {
-            setShowWebView(false);
-          }}>
-          <WebView
-            source={{uri: url}}
-            onLoad={() => setLoading(false)}
-            onNavigationStateChange={event => {
-              const returnUrl = `${FAKE_RETURN_URL}?order_id=${orderId}&payment_processor=KLARNA`;
-              if (event.url.includes(returnUrl)) {
-                setShowWebView(false);
-                setPaymentSuccess(true);
-              }
-            }}
-            style={{marginTop: 20}}
-          />
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator color="#0000ff" size="large" />
+          onRequestClose={closeModal}>
+          <SafeAreaView style={styles.modalRoot}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (canGoBack && webRef.current) {
+                    webRef.current.goBack();
+                  } else {
+                    closeModal();
+                  }
+                }}
+                style={styles.headerBtn}>
+                <Icon
+                  name={canGoBack ? 'chevron-left' : 'close'}
+                  size={24}
+                  color="#fff"
+                />
+                <Text style={styles.headerBtnText}>
+                  {canGoBack ? 'Back' : 'Close'}
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.headerTitle}>Klarna</Text>
+
+              <TouchableOpacity onPress={closeModal} style={styles.headerRight}>
+                <Text style={styles.changeText}>Change method</Text>
+              </TouchableOpacity>
             </View>
-          )}
+
+            <WebView
+              ref={webRef}
+              source={{uri: url}}
+              onLoadStart={() => setLoading(true)}
+              onLoadEnd={() => setLoading(false)}
+              onNavigationStateChange={handleNavChange}
+              startInLoadingState={false}
+              style={styles.webView}
+            />
+
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator color="#fff" size="large" />
+              </View>
+            )}
+          </SafeAreaView>
         </Modal>
       )}
 
@@ -95,36 +154,34 @@ export const KlarnaPaymentButton = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: {alignItems: 'center', marginTop: 20},
+  payButton: {backgroundColor: '#007bff', borderRadius: 5, padding: 10},
+  payButtonText: {color: '#FFFFFF', fontSize: 16},
+
+  modalRoot: {flex: 1, backgroundColor: '#000'},
+  modalHeader: {
+    height: 48,
+    backgroundColor: '#111827',
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
   },
-  payButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-    padding: 10,
-  },
-  payButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
+  headerBtn: {flexDirection: 'row', alignItems: 'center'},
+  headerBtnText: {color: '#fff', marginLeft: 6, fontSize: 16},
+  headerTitle: {color: '#fff', fontSize: 16, fontWeight: '600'},
+  headerRight: {padding: 6},
+  changeText: {color: '#93C5FD', fontWeight: '600'},
+
+  webView: {flex: 1, backgroundColor: '#fff'},
+
   loadingOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  successContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    backgroundColor: 'rgba(17,24,39,0.35)',
   },
-  successText: {
-    fontSize: 18,
-    color: '#4CAF50',
-    marginTop: 10,
-  },
+
+  successContainer: {alignItems: 'center', marginTop: 20},
+  successText: {fontSize: 18, color: '#4CAF50', marginTop: 10},
 });
