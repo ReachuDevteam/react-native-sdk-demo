@@ -17,11 +17,11 @@ export const PaymentScreen = () => {
     state: {cartItems, checkout, selectedCurrency},
   } = useCart();
 
-  const [selectedProvider, setSelectedProvider] = useState('stripe');
+  const [selectedProvider, setSelectedProvider] = useState('klarna');
 
   const providers = [
-    {id: 'stripe', title: 'Stripe', component: StripePaymentButton},
     {id: 'klarna', title: 'Klarna', component: KlarnaPaymentButton},
+    {id: 'stripe', title: 'Stripe', component: StripePaymentButton},
   ];
 
   const {email, billingAddress, shippingAddress} = checkout;
